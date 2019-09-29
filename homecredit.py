@@ -15,8 +15,6 @@ from sklearn.gaussian_process.kernels import RBF
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
-#from sklearn.lda import LDA
-#from sklearn.qda import QDA
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_curve, auc
@@ -40,6 +38,7 @@ class DataSet(object):
         self.__count_unique_values(table)
 
     def __create_customerid_pk_dic(self, table):
+        # Create dictionary with customer_id keys
         dic, self.__customerid_callingnum_map = {}, {}
         table_id = 0
         for line_id, line in enumerate(table):
@@ -74,6 +73,7 @@ class DataSet(object):
         return dic
 
     def __create_customerid_pk_table(self, dic):
+        # Modify initial table to the form where one row belongs to one customer
         table = []
         for table_id in range(len(dic)):
             line = dic[table_id+1]["const_data"]
@@ -99,6 +99,7 @@ class DataSet(object):
         return table
 
     def __constant_data_changed(self, prev_data, curr_data):
+        # Check if the data that supposed to be constant are different
         for val_id, val in enumerate(prev_data):
             if val != curr_data[val_id]:
                 return True
@@ -138,6 +139,7 @@ class DataSet(object):
 
 
     def __change_data_types(self, table):
+        # Transform data types in table
         table_type_changed = []
         for line in table:
             line_type_changed = []
@@ -152,6 +154,7 @@ class DataSet(object):
                     else:
                         line_type_changed.append(0)#False)
                 else:
+                    # Enum columns
                     if label_type != "state":
                         if line[label_id] == "PhD or equivalent":
                             line_type_changed.append(3)
@@ -162,6 +165,7 @@ class DataSet(object):
                         else:
                             line_type_changed.append(0)
                     else:
+                        # Range states by their economic condition
                         # West Coast
                         if line[label_id] in ("CA", "WA", "OR", "HI"):
                             line_type_changed.append(7)
@@ -205,7 +209,7 @@ class DataSet(object):
         return max_mode
 
     def __count_unique_values(self, table):
-
+        # Count statistics by columns
         self.__mark_columns_type()
         table = self.__change_data_types(table)
         self.dataframe = pd.DataFrame(table, columns = self.columns_type.keys())
@@ -225,6 +229,7 @@ class DataSet(object):
                 self.unique_values[label]["mode"] = self.__find_max_mode(self.dataframe[label])#statistics.mode(dataframe[label])
 
     def train_test_split(self):
+         # Split dataset to train and test sets
         trainset = self.dataframe.loc[:round(len(self.dataframe)*0.9)]
         testset = self.dataframe.loc[round(len(self.dataframe)*0.9):]
         self.X_train = trainset.loc[ : , trainset.columns != "churn"]
